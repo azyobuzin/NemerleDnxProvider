@@ -1,0 +1,31 @@
+﻿{
+  "version": "1.0.0-*",
+  "description": "TestApp Console Application",
+  "authors": [ "azyobuzin" ],
+  "tags": [ "" ],
+  "projectUrl": "",
+  "licenseUrl": "",
+
+  "dependencies": {
+    "NemerleDnxProvider": {
+      "type": "build",
+      "version": ""
+    }
+  },
+
+  "compiler": {
+    "name": "Nemerle",
+    "compilerAssembly": "NemerleDnxProvider",
+    "compilerType": "NemerleDnxProvider.NemerleProjectCompiler"
+  },
+
+  "compile": [ "./**/*.n" ],
+
+  "commands": {
+    "TestApp": "TestApp"
+  },
+
+  "frameworks": {
+    "dnx451": { }
+  }
+}
