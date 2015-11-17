@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using Microsoft.Dnx.Compilation;
@@ -11,18 +12,18 @@ namespace NemerleDnxProvider
         public NemerleProjectReference(
             string name,
             string projectPath,
-            IReadOnlyDictionary<string, byte[]> files,
+            DirectoryInfo outputDir,
             DiagnosticResult diagnostics,
             IList<ISourceReference> sources)
         {
             this.Name = name;
             this.ProjectPath = projectPath;
-            this.files = files;
+            this.outputDir = outputDir;
             this.diagnostics = diagnostics;
             this.sources = sources;
         }
 
-        private readonly IReadOnlyDictionary<string, byte[]> files;
+        private readonly DirectoryInfo outputDir;
         private readonly DiagnosticResult diagnostics;
         private readonly IList<ISourceReference> sources;
 
@@ -33,17 +34,26 @@ namespace NemerleDnxProvider
         public DiagnosticResult EmitAssembly(string outputPath)
         {
             Directory.CreateDirectory(outputPath);
-            foreach (var kvp in this.files)
+            foreach (var f in this.outputDir.EnumerateFiles())
             {
-                File.WriteAllBytes(Path.Combine(outputPath, kvp.Key), kvp.Value);
+                if (f.Name.StartsWith(this.Name, StringComparison.Ordinal))
+                    f.CopyTo(Path.Combine(outputPath, f.Name), true);
             }
             return this.diagnostics;
         }
 
+        private string GetAssemblyFileName()
+        {
+            return Path.Combine(this.outputDir.FullName, this.Name + ".dll");
+        }
+
         public void EmitReferenceAssembly(Stream stream)
         {
-            var b = this.files[this.Name + ".dll"];
-            stream.Write(b, 0, b.Length);
+            if (!this.diagnostics.Success)
+                throw new NemerleCompilationException(this.diagnostics.Diagnostics);
+
+            using (var s = File.OpenRead(this.GetAssemblyFileName()))
+                s.CopyTo(stream);
         }
 
         public DiagnosticResult GetDiagnostics() => this.diagnostics;
@@ -52,17 +62,10 @@ namespace NemerleDnxProvider
 
         public Assembly Load(AssemblyName assemblyName, IAssemblyLoadContext loadContext)
         {
-            using (var assemblyStream = new MemoryStream(this.files[this.Name + ".dll"]))
-            {
-                byte[] pdb;
-                if (this.files.TryGetValue(this.Name + ".pdb", out pdb))
-                {
-                    using (var pdbStream = new MemoryStream(pdb))
-                        return loadContext.LoadStream(assemblyStream, pdbStream);
-                }
+            if (!this.diagnostics.Success)
+                throw new NemerleCompilationException(this.diagnostics.Diagnostics);
 
-                return loadContext.LoadStream(assemblyStream, null);
-            }
+            return loadContext.LoadFile(this.GetAssemblyFileName());
         }
     }
 }
