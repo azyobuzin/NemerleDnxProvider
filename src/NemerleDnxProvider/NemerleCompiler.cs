@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Microsoft.Dnx.Compilation;
-using Microsoft.Dnx.Runtime;
+using Microsoft.Extensions.CompilationAbstractions;
+using Microsoft.Extensions.PlatformAbstractions;
 using Nemerle.Collections;
 using Nemerle.Compiler;
 

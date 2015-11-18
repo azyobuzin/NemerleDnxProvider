@@ -1,11 +1,11 @@
 ﻿{
-  "version": "1.0.0-alpha3",
+  "version": "1.1.0-alpha1",
   "description": "Nemerle Compiler for DNX",
   "authors": [ "azyobuzin" ],
   "projectUrl": "https://github.com/azyobuzin/NemerleDnxProvider",
 
   "dependencies": {
-    "Microsoft.Dnx.Compilation": "1.0.0-beta8",
+    "Microsoft.Dnx.Compilation": "1.0.0-rc2-16177",
     "Nemerle.Compiler": "1.2.477"
   },
 
