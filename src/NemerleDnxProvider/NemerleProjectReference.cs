@@ -36,7 +36,7 @@ namespace NemerleDnxProvider
             Directory.CreateDirectory(outputPath);
             foreach (var f in this.outputDir.EnumerateFiles())
             {
-                if (f.Name.StartsWith(this.Name, StringComparison.Ordinal))
+                if (string.Equals(this.Name, Path.GetFileNameWithoutExtension(f.Name), StringComparison.OrdinalIgnoreCase))
                     f.CopyTo(Path.Combine(outputPath, f.Name), true);
             }
             return this.diagnostics;

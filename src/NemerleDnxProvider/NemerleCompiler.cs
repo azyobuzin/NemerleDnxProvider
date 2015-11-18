@@ -19,21 +19,34 @@ namespace NemerleDnxProvider
             var name = projectContext.Target.Name;
 
             var outputDir = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()));
-            var sw = new StringWriter();
             var options = new CompilationOptions
             {
                 TargetIsLibrary = true,
                 ThrowOnError = true,
                 IgnoreConfusion = true,
+                EmitDebug = true,
+                // Platform = projectContext.CompilerOptions.Platform,
                 ReferencedLibraries = incomingReferences.Select(x => MetadataReferenceToPath(x, outputDir)).NToList(),
                 OutputPath = outputDir.FullName,
-                OutputFileName = Path.Combine(outputDir.FullName, name + ".dll"),
+                OutputFileName = Path.Combine(outputDir.FullName, name + ".dll")
                 // XmlDocOutputFileName = Path.Combine(outputDir.FullName, name + ".xml")
             };
             var sourceFiles = projectContext.Files.SourceFiles
                 .Concat(incomingSourceReferences.OfType<ISourceFileReference>().Select(x => x.Path))
                 .ToArray();
             options.Sources = Array.ConvertAll(sourceFiles, x => new FileSource(x, options.Warnings)).AsList<ISource>();
+            foreach (var symbol in projectContext.CompilerOptions.Defines)
+                options.DefineConstant(symbol);
+            if (projectContext.CompilerOptions.Optimize.GetValueOrDefault())
+            {
+                options.Optimize = new Hashtable<string, int>
+                {
+                    ["tuple"] = 1,
+                    ["propagate"] = 1,
+                    ["unify"] = 1,
+                    ["print"] = 0
+                };
+            }
 
             var diagnostics = new List<DiagnosticMessage>();
             var manager = new ManagerClass(options);
