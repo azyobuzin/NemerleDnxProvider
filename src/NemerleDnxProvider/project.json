@@ -5,7 +5,7 @@
   "projectUrl": "https://github.com/azyobuzin/NemerleDnxProvider",
 
   "dependencies": {
-    "Microsoft.Dnx.Compilation": "1.0.0-beta8",
+    "Microsoft.Dnx.Compilation": "1.0.0-rc1-final",
     "Nemerle.Compiler": "1.2.477"
   },
 
